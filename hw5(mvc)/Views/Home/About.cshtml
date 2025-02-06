@@ -1,0 +1,76 @@
+﻿@{
+    var user = ViewBag.User as User;
+}
+
+<div class="container">
+    <section class="welcome" id="home">
+        <div class="row">
+            <div class="col-sm-8">
+                <h2>Welcome to my portfolio</h2>
+                <p>Hello, my name is @user.Name, I am @user.Age years old and this is my portfolio.Currently, I am actively learning C# and ASP.NET, deepening my knowledge in these technologies to develop web applications. I have experience working with Python, C++, JavaScript, and SQL. I also use Entity Framework Core for working with databases</p>
+                <p>Below you can check out my projects.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="portfolio" id="projects">
+        <div class="container">
+            <h2 class="text-center">My projects</h2>
+
+            <div class="row">
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Project 1</h5>
+                            <p>Telegram bot.</p>
+                            <a href="https://github.com/DanyloBudianskyi/np-exam" class="btn btn-primary">Learn more</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Project 2</h5>
+                            <p>Ef core exam.</p>
+                            <a href="https://github.com/DanyloBudianskyi/ef_core_exam" class="btn btn-primary">Learn more</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Project 3</h5>
+                            <p>Dictionary.</p>
+                            <a href="https://github.com/DanyloBudianskyi/exam_task" class="btn btn-primary">Learn more</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="text-center">
+        <h2>My skills</h2>
+
+        <table class="table table-hover">
+            <tbody>
+                <tr>
+                    <th>Title</th>
+                    <th>Progress bar</th>
+                    <th>%</th>
+                </tr>
+                @foreach (var skill in user.Skills)
+                {
+                    <tr>
+                        <td>@skill.Title</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" style="width:@skill.Level%;"></div>
+                            </div>
+                        </td>
+                        <td>@skill.Level %</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
