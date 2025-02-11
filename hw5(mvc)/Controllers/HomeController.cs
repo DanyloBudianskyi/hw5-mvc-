@@ -22,34 +22,34 @@ namespace hw5_mvc_.Controllers
         {
             return View();
         }
-        public IActionResult About()
-        {
-            var User = new User
-            {
-                Name = "Danil Budyanskiy",
-                Age = 19,
-                Skills = new List<Skill>
-                {
-                    new Skill
-                    {
-                        Title = "Python",
-                        Level = 30,
-                    },
-                    new Skill {
-                        Title = "C#",
-                        Level = 50,
-                    },
-                    new Skill
-                    {
-                        Title = "JS",
-                        Level = 40
-                    }
-                }
-            };
-            ViewBag.User = User;
+        //public IActionResult About()
+        //{
+        //    var User = new UserInfo
+        //    {
+        //        Name = "Danil Budyanskiy",
+        //        Email = "test@test.com",
+        //        Description = "Description",
+        //        Skills = new List<Skill>
+        //        {
+        //            new Skill
+        //            {
+        //                Title = "Python",
+        //                Level = 30,
+        //            },
+        //            new Skill {
+        //                Title = "C#",
+        //                Level = 50,
+        //            },
+        //            new Skill
+        //            {
+        //                Title = "JS",
+        //                Level = 40
+        //            }
+        //        }
+        //    };
 
-            return View();
-        }
+        //    return View(User);
+        //}
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

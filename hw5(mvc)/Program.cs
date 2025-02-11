@@ -1,3 +1,5 @@
+using hw5_mvc_.Models;
+
 namespace hw5_mvc_
 {
     public class Program
@@ -8,6 +10,8 @@ namespace hw5_mvc_
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<UserInfoService>();
+            builder.Services.AddScoped<SkillService>();
 
             var app = builder.Build();
 
