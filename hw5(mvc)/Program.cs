@@ -1,4 +1,5 @@
 using hw5_mvc_.Models;
+using hw5_mvc_.Models.Services;
 
 namespace hw5_mvc_
 {
@@ -12,6 +13,7 @@ namespace hw5_mvc_
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<UserInfoService>();
             builder.Services.AddScoped<SkillService>();
+            builder.Services.AddScoped<FileService>();
 
             var app = builder.Build();
 

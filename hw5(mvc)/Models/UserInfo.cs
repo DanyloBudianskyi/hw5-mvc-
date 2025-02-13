@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using hw5_mvc_.Models;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace hw5_mvc_
@@ -14,5 +15,7 @@ namespace hw5_mvc_
         public DateTime Birthday { get; set; }
         public List<Skill>? Skills { get; set; } = [];
         public string? Profession { get; set; }
-    }
+        public ImageFile? MainImageFile { get; set; }
+        public List<ImageFile> ImageFiles { get; set; } = new List<ImageFile> { };
+	}
 }

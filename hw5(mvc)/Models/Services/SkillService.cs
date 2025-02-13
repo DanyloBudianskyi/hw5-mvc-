@@ -33,6 +33,11 @@ namespace hw5_mvc_.Models
         }
         public void Delete(Skill user)
         {
+            if (user.Icon != null)
+            {
+                File.Delete($@"{Directory.GetCurrentDirectory()}/wwwroot/Icons/{user.Icon}");
+            }
+
             Skills.Remove(user);
             SaveChanges();
         }

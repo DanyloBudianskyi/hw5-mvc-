@@ -1,6 +1,7 @@
 ﻿@model SkillForm
 @{
     ViewData["Title"] = "Edit " + Model.Title;
+    var icon = ViewData["icon"] as ImageFile;
     var list = new SelectList(Model.Colors.Select(
         x => new { Value = x.Value, Title = x.Key })
         .ToList(), "Value", "Title");
@@ -8,7 +9,7 @@
 
 <div>
     <h1 class="display-4">@ViewData["Title"]</h1>
-    <form method="post" asp-controller="Skill" asp-action="Edit">
+    <form method="post" enctype="multipart/form-data" asp-controller="Skill" asp-action="Edit">
         <div class="card">
             <div class="card-body">
 
@@ -22,8 +23,19 @@
                     @Html.DropDownListFor(x => x.Color, list, new { @class = "form-control" })
                     @Html.ValidationMessageFor(x => x.Color, null, new { @class = "text-danger" })
                 </div>
-
-
+                <div class="mb-3">
+                    @Html.LabelFor(x => x.Icon, new { @class = "form-label" })
+                    @Html.TextBoxFor(x => x.Icon, new { @class = "form-control", type = "file", accept = "*.jpg,*.jpeg,*.png" })
+                    @Html.ValidationMessageFor(x => x.Icon, null, new { @class = "text-danger" })
+                </div>
+                @if(icon != null)
+                {
+                    <div>
+                        <h4>Current icon</h4>
+                        <img style="max-width: 100px;" class="img-thumbnail" src="@icon.Src" />
+                    </div>
+                }
+               
             </div>
             <div class="card-footer">
                 <button class="btn btn-primary" type="submit">Save</button>

@@ -1,10 +1,12 @@
 ﻿using hw5_mvc_.Models;
 using hw5_mvc_.Models.Forms;
+using hw5_mvc_.Models.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace hw5_mvc_.Controllers
 {
-    public class SkillController(ILogger<SkillController> logger, SkillService service) : Controller
+    public class SkillController(ILogger<SkillController> logger, SkillService service, FileService fileService) : Controller
     {
         public IActionResult Index()
         {
@@ -17,7 +19,7 @@ namespace hw5_mvc_.Controllers
             return View(model);
         }
         [HttpPost]
-        public IActionResult Create([FromForm] SkillForm form)
+        public async Task<IActionResult> Create([FromForm] SkillForm form)
         {
             if (!ModelState.IsValid)
             {
@@ -25,6 +27,12 @@ namespace hw5_mvc_.Controllers
             }
             var model = new Skill();
             form.Update(model);
+
+            if (form.Icon != null)
+            {
+                var imageFile = await fileService.SaveAsync("skillIcons", form.Icon);
+                model.Icon = imageFile;
+            }
 
             var random = new Random();
             do
@@ -42,18 +50,33 @@ namespace hw5_mvc_.Controllers
         }
         public IActionResult Edit(int id)
         {
+            var model = service.FindById(id);
+            if (model.Icon != null)
+            {
+                ViewData["icon"] = model.Icon;
+            }
             ViewData["id"] = id;
             return View(new SkillForm(service.FindById(id)));
         }
         [HttpPost]
-        public IActionResult Edit(int id, [FromForm] SkillForm form)
+        public async Task<IActionResult> Edit(int id, [FromForm] SkillForm form)
         {
             if (!ModelState.IsValid)
             {
                 ViewData["id"] = id;
                 return View(form);
             }
+            
             var model = service.FindById(id);
+            if (form.Icon != null)
+            {
+                var imageFile = await fileService.SaveAsync("skillIcons", form.Icon);
+                if(model.Icon != null)
+                {
+                    fileService.Delete(model.Icon);
+                }
+                model.Icon = imageFile;
+            }
             form.Update(model);
 
             service.SaveChanges();
@@ -61,8 +84,9 @@ namespace hw5_mvc_.Controllers
         }
         public IActionResult Delete(int id)
         {
-            var userToDelete = service.FindById(id);
-            service.Delete(userToDelete);
+            var skillToDelete = service.FindById(id);
+            fileService.Delete(skillToDelete.Icon);
+            service.Delete(skillToDelete);
             return RedirectToAction("Index");
         }
     }

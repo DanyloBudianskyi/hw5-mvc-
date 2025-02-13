@@ -1,16 +1,39 @@
 ﻿@model UserInfo
 @{
-
+    ImageFile? mainImage = Model.MainImageFile;
+    if(Model.MainImageFile == null)
+    {
+        mainImage = Model.ImageFiles.FirstOrDefault();
+    }
 }
 
 <div>
     <h1>Hello @Model.Name</h1>
+    @if (mainImage != null)
+        {
+    <div>
+        Your main image
+            <img style="max-width: 200px;" class="img-thumbnail" src="@mainImage.Src" />
+    </div>
+    }
     <h3>Email @Model.Email</h3>
     <div>Profession: @Model.Profession</div>
     
     <div class="text-center">
-        <h2>My skills</h2>
-
+        <h2>My Gallery</h2>
+        @if (Model.ImageFiles.Count > 0)
+        {
+                            <div style="display: flex">
+                @foreach (var item in Model.ImageFiles)
+                {
+                                    <div style="position: relative">
+                                        <img style="max-width: 200px;" class="img-thumbnail" src="@item.Src" />
+                                        <button data-id="@Model.Id" data-name="@item.Src" class="btn btn-sm btn-danger delete-image" style="position: absolute; top: 5px; right: 5px;">X</button>
+                                        <button data-id="@Model.Id" data-name="@item.Src" class="btn btn-sm btn-success set-main-image" style="position:absolute; left: 35px; bottom: 10px;">Set as main image</button>
+                                    </div>
+                }
+                            </div>
+        }
         <table class="table table-hover">
             <tbody>
                 <tr>
@@ -18,21 +41,40 @@
                     <th>Progress bar</th>
                     <th>%</th>
                 </tr>
-                @foreach (var skill in Model.Skills)
-                {
-                    <tr>
-                        <td>@skill.Title</td>
-@*                         <td>
-                            <div class="progress">
-                                <div class="progress-bar" style="width:@skill.Level%;"></div>
-                            </div>
-                        </td>
-                        <td>@skill.Level %</td> *@
-                    </tr>
-                }
+
             </tbody>
         </table>
         <a asp-controller="UserInfo" asp-action="Index"
             class="btn btn-outline-success">Return</a>
     </div>
 </div>
+
+
+@section Scripts {
+        <script>
+             document.querySelectorAll(".set-main-image").forEach(el => {
+                    el.addEventListener("click", e => {
+                        console.log("click on set main image btn")
+                        const itemId = e.target.getAttribute("data-id")
+                        const imageSrc = e.target.getAttribute("data-name")
+                        fetch(`/UserInfo/ChangeMainImage/${itemId}?src=${imageSrc}`)
+                            .then(() => {
+                                window.location.reload()
+                            })
+                    })
+                })
+                    document.querySelectorAll(".delete-image").forEach(el => {
+                el.addEventListener("click", e => {
+                    console.log("click on set main image btn")
+                    const itemId = e.target.getAttribute("data-id")
+                    const imageSrc = e.target.getAttribute("data-name")
+                    fetch(`/UserInfo/DeleteImage/${itemId}?src=${imageSrc}`)
+                        .then(() => {
+                            window.location.reload()
+                        })
+                        })
+            })
+
+
+        </script>
+}

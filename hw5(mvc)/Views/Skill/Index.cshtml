@@ -12,15 +12,21 @@
 		<thead>
 			<tr>
 				<th>Id</th>
+				<th>Icon</th>
 				<th>Title</th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach(var item in Model)
 			{
-				Console.WriteLine(item.Color);
 				<tr>
 					<td>@item.Id</td>
+					<td>
+							@if (item.Icon != null)
+							{
+								<img style="max-width: 50px;" class="img-thumbnail" src="@item.Icon.Src" />
+							}
+					</td>
 					<td style="color: @item.Color">@item.Title</td>
 					<td>
 						<a asp-area="" asp-controller="Skill" asp-action="Edit" asp-route-id="@item.Id" class=" btn btn-primary">

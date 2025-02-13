@@ -24,6 +24,7 @@ namespace hw5_mvc_.Models.Forms
         [MaxLength(20)]
         public string Title { get; set; }
         public string Color { get; set; }
+        public IFormFile? Icon { get; set; }
         public Dictionary<string, string> Colors => new Dictionary<string, string>()
         {
             {"Red", "#8B0000" },

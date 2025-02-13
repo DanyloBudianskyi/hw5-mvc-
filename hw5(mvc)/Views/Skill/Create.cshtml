@@ -8,7 +8,7 @@
 
 <div>
     <h1 class="display-4">@ViewData["Title"]</h1>
-    <form method="post" asp-controller="Skill" asp-action="Create">
+    <form method="post" enctype="multipart/form-data" asp-controller="Skill" asp-action="Create">
         <div class="card">
             <div class="card-body">
 
@@ -21,6 +21,11 @@
                     @Html.LabelFor(x => x.Color, new { @class = "form-label" })
                     @Html.DropDownListFor(x => x.Color, list, new { @class = "form-control" })
                     @Html.ValidationMessageFor(x => x.Color, null, new { @class = "text-danger" })
+                </div>
+                <div class="mb-3">
+                    @Html.LabelFor(x => x.Icon, new { @class = "form-label" })
+                    @Html.TextBoxFor(x => x.Icon, new { @class = "form-control", type = "file", accept = "*.jpg,*.jpeg,*.png" })
+                    @Html.ValidationMessageFor(x => x.Icon, null, new { @class = "text-danger" })
                 </div>
             </div>
             <div class="card-footer">

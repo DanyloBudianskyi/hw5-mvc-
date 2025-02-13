@@ -13,8 +13,10 @@
 		<thead>
 			<tr>
 				<th>Id</th>
+				<th>Image</th>
 				<th>Name</th>
 				<th>Email</th>
+				<th>Profession</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -22,8 +24,15 @@
 			{
 				<tr>
 					<td>@item.Id</td>
+@* 					<td>
+						@if(item.ImageFile != null)
+						{
+							<img style="max-width: 50px;" class="img-thumbnail" src="/uploads/@item.ImageFile" />
+						}
+					</td> *@
 					<td>@item.Name</td>
 					<td>@item.Email</td>
+					<td>@item.Profession</td>
 					<td>
 						<a asp-area="" asp-controller="UserInfo" asp-action="View" asp-route-id="@item.Id" class=" btn btn-primary">
 							View

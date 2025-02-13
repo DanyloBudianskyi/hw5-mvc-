@@ -53,6 +53,10 @@ namespace hw5_mvc_.Models.Forms
             "Frontend developer",
             "Backend developer",
             "Fullstack developer"
-            ];
+        ];
+        [DisplayName("Profile image")]
+        public IFormFile? Image { get; set; }
+
+        public ICollection<IFormFile>? Gallery { get; set; }
     }
 }
