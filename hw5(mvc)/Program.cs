@@ -14,6 +14,7 @@ namespace hw5_mvc_
             builder.Services.AddScoped<UserInfoService>();
             builder.Services.AddScoped<SkillService>();
             builder.Services.AddScoped<FileService>();
+            builder.Services.AddScoped<UserSkillService>();
 
             var app = builder.Build();
 

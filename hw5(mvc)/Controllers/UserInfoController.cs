@@ -6,7 +6,13 @@ using System.Reflection;
 
 namespace hw5_mvc_.Controllers
 {
-    public class UserInfoController(ILogger<UserInfoController> logger, UserInfoService service, FileService fileService) : Controller
+    public class UserInfoController(
+        ILogger<UserInfoController> logger,
+        UserInfoService service,
+        UserSkillService userSkillService,
+        SkillService skillService,
+        FileService fileService
+        ) : Controller
     {
         public IActionResult Index()
         {
@@ -14,6 +20,10 @@ namespace hw5_mvc_.Controllers
         }
         public IActionResult View(int id)
         {
+            var userSkills = userSkillService.GetAll().Where(x => x.UserId == id).ToList();
+            var skills = skillService.GetAll().ToList();
+            ViewData["userSkills"] = userSkills;
+            ViewData["skills"] = skills;
             return View(service.FindById(id));
         }
         [HttpGet]
@@ -46,26 +56,35 @@ namespace hw5_mvc_.Controllers
                 }
             }
             var random = new Random();
-			do
-			{
-				var id = random.Next(1, 1000);
-				if (service.FindById(id) != null)
-				{
-					continue;
-				}
+            do
+            {
+                var id = random.Next(1, 1000);
+                if (service.FindById(id) != null)
+                {
+                    continue;
+                }
                 model.Id = id;
-			} while (model.Id == 0);
+            } while (model.Id == 0);
 
             service.Add(model);
 
             service.SaveChanges();
             return RedirectToAction("Index");
-		}
+        }
         [HttpGet]
         public IActionResult Edit(int id)
         {
             ViewData["id"] = id;
-            return View(new UserInfoForm(service.FindById(id)));
+            var form = new UserInfoForm(service.GetAll().First(x => x.Id == id));
+            var userSkills = userSkillService.GetAll().Where(x => x.UserId == id).ToList();
+            var skills = skillService.GetAll().ToList();
+            var availableSkills = skills.Where(x => !userSkills.Select(x => x.SkillId).ToList().Contains(x.Id)).ToList();
+            
+            ViewData["userSkills"] = userSkills;
+            ViewData["skills"] = skills;
+            ViewData["availableSkills"] = availableSkills;
+
+            return View(form);
         }
         [HttpPost]
         public async Task<IActionResult> Edit(int id, [FromForm] UserInfoForm form)
@@ -77,10 +96,6 @@ namespace hw5_mvc_.Controllers
             }
 
             var model = service.FindById(id);
-            if (model == null)
-            {
-                Console.WriteLine("daw");
-            }
             if (form.Image != null)
             {
                 var imageFile = await fileService.SaveAsync("userInfos", form.Image);
@@ -88,16 +103,16 @@ namespace hw5_mvc_.Controllers
                 model.ImageFiles.Add(imageFile);
             }
             if (form.Gallery != null)
-			{
+            {
                 foreach (var item in form.Gallery)
                 {
                     var imageFile = await fileService.SaveAsync("userInfos", item);
-                    if(imageFile == null) Console.WriteLine("imagefile == null");
+                    if (imageFile == null) Console.WriteLine("imagefile == null");
                     model.ImageFiles.Add(imageFile);
                 }
-			}
+            }
 
-			form.Update(model);
+            form.Update(model);
             service.SaveChanges();
             return RedirectToAction("Index");
         }
@@ -112,16 +127,12 @@ namespace hw5_mvc_.Controllers
             service.SaveChanges();
             return RedirectToAction("Index");
         }
-        public IActionResult ChangeMainImage(int id, [FromQuery]string src)
+        public IActionResult ChangeMainImage(int id, [FromQuery] string src)
         {
             var model = service.FindById(id);
-
-
             model.MainImageFile = model.ImageFiles.First(x => x.Src == src);
-
-
-           service.SaveChanges();
-           return Json(new { Ok = true });
+            service.SaveChanges();
+            return Json(new { Ok = true });
         }
 
         public IActionResult DeleteImage(int id, [FromQuery] string src)
@@ -136,6 +147,60 @@ namespace hw5_mvc_.Controllers
             }
 
             return Json(new { Ok = true });
+        }
+        public IActionResult AddSkill([FromBody] UserSkill data)
+        {
+            var skill = skillService.GetAll().First(x => x.Id == data.SkillId);
+            var user = service.GetAll().First(x => x.Id == data.UserId);
+
+            if (null != userSkillService.GetAll().FirstOrDefault(x => x.UserId == user.Id && x.SkillId == skill.Id))
+            {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false });
+            }
+            var newUserSkill = new UserSkill
+            {
+                UserId = user.Id,
+                SkillId = skill.Id,
+                Level = data.Level
+            };
+            var random = new Random();
+            do
+            {
+                var id = random.Next(1, 1000);
+                if (userSkillService.FindById(id) != null)
+                {
+                    continue;
+                }
+                newUserSkill.Id = id;
+            } while (user.Id == 0);
+
+
+            userSkillService.Add(newUserSkill);
+            userSkillService.SaveChanges();
+            return Json(new { Ok = true });
+        }
+        public IActionResult DeleteSkill([FromBody] UserSkill data)
+        {
+            var userSkill = userSkillService.GetAll().First(x => x.SkillId == data.SkillId && x.UserId == data.UserId);
+            if (userSkill != null)
+            {
+                userSkillService.Delete(userSkill);
+                userSkillService.SaveChanges();
+                return Json(new { Ok = true });
+            }
+            return Json(new { Ok = false });
+        }
+        public IActionResult EditSkill([FromBody] UserSkill data)
+        {
+            var userSkill = userSkillService.GetAll().First(x => x.SkillId == data.SkillId && x.UserId == data.UserId);
+            if (userSkill != null)
+            {
+                userSkill.Level = data.Level;
+                userSkillService.SaveChanges();
+                return Json(new { Ok = true });
+            }
+            return Json(new { Ok = false });
         }
     }
 }

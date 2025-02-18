@@ -58,5 +58,6 @@ namespace hw5_mvc_.Models.Forms
         public IFormFile? Image { get; set; }
 
         public ICollection<IFormFile>? Gallery { get; set; }
+        
     }
 }

@@ -5,6 +5,8 @@
     {
         mainImage = Model.ImageFiles.FirstOrDefault();
     }
+    var skills = ViewData["skills"] as List<Skill>;
+    var userSkills = ViewData["userSkills"] as List<UserSkill>;
 }
 
 <div>
@@ -34,6 +36,27 @@
                 }
                             </div>
         }
+        @*         <table class="table table-hover">
+        <tbody>
+        <tr>
+        <th>Title</th>
+        <th>Progress bar</th>
+        <th>%</th>
+        </tr>
+        @foreach (var skill in Model.Skills)
+        {
+        <tr>
+        <td>@skill.Title</td>
+        <td>
+        <div class="progress">
+        <div class="progress-bar" style="width:@skill.Level%;"></div>
+        </div>
+        </td>
+        <td>@skill.Level %</td>
+        </tr>
+        }
+        </tbody>
+        </table> *@
         <table class="table table-hover">
             <tbody>
                 <tr>
@@ -41,7 +64,19 @@
                     <th>Progress bar</th>
                     <th>%</th>
                 </tr>
-
+                @foreach (var userSkill in userSkills)
+                {
+                    var currentSkill = skills.First(x => x.Id == userSkill.SkillId);
+                    <tr>
+                        <td>@currentSkill.Title</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" style="width:@userSkill.Level%;"></div>
+                            </div>
+                        </td>
+                        <td>@userSkill.Level</td>
+                    </tr>
+                }
             </tbody>
         </table>
         <a asp-controller="UserInfo" asp-action="Index"

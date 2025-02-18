@@ -5,6 +5,10 @@
     var list = new SelectList(Model.Professions.Select(
         x => new { Id = i++, Title = x })
         .ToList(), "Id", "Title");
+
+    var userSkills = ViewData["userSkills"] as List<UserSkill>;
+    var skills = ViewData["skills"] as List<Skill>;
+    var availableSkills = ViewData["availableSkills"] as List<Skill>;
 }
 
 <div>
@@ -64,11 +68,150 @@
             </div>
         </div>
     </form>
-
+    <div>
+        <table class="table table-hover" data-user-id="@ViewData["id"]">
+            <thead>
+            </thead>
+            <tbody>
+                @foreach (var userSkill in userSkills)
+                {
+                    var currentSkill = skills.First(x => x.Id == userSkill.SkillId);
+                    <tr data-model-id="@userSkill.SkillId">
+                        <td>
+                            @if (currentSkill.Icon != null)
+                            {
+                                <img style="max-width: 50px;" class="img-thumbnail" src="@currentSkill.Icon.Src" />
+                            }
+                        </td>
+                        <td>
+                            @currentSkill.Title
+                        </td>
+                        <td>
+                            <input class="skill-level form-control" type="number" min="1" max="100" value="@userSkill.Level" />
+                        </td>
+                        <td>
+                            <button class="btn btn-primary edit-skill">Edit</button>
+                            <button class="btn btn-danger delete-skill">Remove</button>
+                        </td>
+                    </tr>
+                }
+                @foreach (var skill in availableSkills)
+                {
+                    <tr data-model-id="@skill.Id">
+                        <td>
+                            @if (skill.Icon != null)
+                            {
+                                <img style="max-width: 50px;" class="img-thumbnail" src="@skill.Icon.Src" />
+                            }
+                        </td>
+                        <td>
+                            @skill.Title
+                        </td>
+                        <td>
+                            <input class="skill-level" typeof="number" min="1" max="100" value="" />
+                        </td>
+                        <td colspan="2">
+                            
+                            <button class="btn btn-success add-skill">Add</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
     <a asp-area=""
        asp-controller="UserInfo"
        asp-action="Index"
        class="btn btn-primary">Return</a>
 </div>
+
+
+@section Scripts {
+    <script>
+        
+        document.querySelectorAll(".add-skill").forEach(el => {
+            el.addEventListener("click", e => {
+                const row = e.target.closest("tr");
+                const skillId = row.getAttribute("data-model-id");
+                const userId = document.querySelector("table").getAttribute("data-user-id");
+                const level = row.querySelector("input.skill-level").value;
+
+                const data = {
+                    SkillId: skillId,
+                    UserId: userId,
+                    Level: level
+                };
+
+                fetch("/UserInfo/AddSkill", {
+                    method: "post",
+                    headers: {
+                        "Content-type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                }).then(() => {
+                    window.location.reload();
+                })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            });
+        });
+
+        document.querySelectorAll(".delete-skill").forEach(el => {
+            el.addEventListener("click", e => {
+                const row = e.target.closest("tr");
+                const skillId = row.getAttribute("data-model-id");
+                const userId = document.querySelector("table").getAttribute("data-user-id");
+
+                const data = {
+                    SkillId: skillId,
+                    UserId: userId
+                }
+
+                fetch("/UserInfo/DeleteSkill", {
+                    method: "post",
+                    headers: {
+                        "Content-type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(() => {
+                    window.location.reload()
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            })
+        })
+
+        document.querySelectorAll(".edit-skill").forEach(el => {
+            el.addEventListener("click", e => {
+                const row = e.target.closest("tr");
+                const skillId = row.getAttribute("data-model-id");
+                const userId = document.querySelector("table").getAttribute("data-user-id");
+                const level = row.querySelector("input.skill-level").value;
+
+                const data = {
+                    SkillId: skillId,
+                    UserId: userId,
+                    Level: level
+                };
+
+                fetch("/UserInfo/EditSkill", {
+                    method: "post",
+                    headers: {
+                        "Content-type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                }).then(() => {
+                    window.location.reload();
+                })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            });
+        });
+    </script>
+}
 
 

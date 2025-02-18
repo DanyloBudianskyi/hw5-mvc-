@@ -5,6 +5,8 @@
     var list = new SelectList(Model.Colors.Select(
         x => new { Value = x.Value, Title = x.Key })
         .ToList(), "Value", "Title");
+
+
 }
 
 <div>
@@ -43,8 +45,11 @@
         </div>
     </form>
 
+
+
     <a asp-area=""
        asp-controller="Skill"
        asp-action="Index"
        class="btn btn-primary">Return</a>
 </div>
+
