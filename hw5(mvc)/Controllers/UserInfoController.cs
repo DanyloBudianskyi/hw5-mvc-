@@ -2,29 +2,43 @@
 using hw5_mvc_.Models.Forms;
 using hw5_mvc_.Models.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace hw5_mvc_.Controllers
 {
     public class UserInfoController(
         ILogger<UserInfoController> logger,
-        UserInfoService service,
-        UserSkillService userSkillService,
-        SkillService skillService,
+        SiteContext context,
         FileService fileService
         ) : Controller
     {
         public IActionResult Index()
         {
-            return View(service.GetAll());
+            return View(context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .Include(x => x.ImageFiles)
+                .Include(x => x.MainImageFile)
+                .ToList());
         }
-        public IActionResult View(int id)
+        public async Task<IActionResult> View(int id)
         {
-            var userSkills = userSkillService.GetAll().Where(x => x.UserId == id).ToList();
-            var skills = skillService.GetAll().ToList();
+            var model = context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .Include(x => x.ImageFiles)
+                .Include(x => x.MainImageFile)
+                .First(x => x.Id == id);
+            var userSkills = model.UserSkills;
+            var skills = await context.Skills
+                .Include(x => x.Icon)
+                .ToListAsync();
+
             ViewData["userSkills"] = userSkills;
             ViewData["skills"] = skills;
-            return View(service.FindById(id));
+
+            return View(model);
         }
         [HttpGet]
         public IActionResult Create()
@@ -52,34 +66,37 @@ namespace hw5_mvc_.Controllers
                 foreach (var item in form.Gallery)
                 {
                     var imageFile = await fileService.SaveAsync("userInfos", item);
+                    context.ImageFiles.Add(imageFile);
                     model.ImageFiles.Add(imageFile);
                 }
             }
-            var random = new Random();
-            do
-            {
-                var id = random.Next(1, 1000);
-                if (service.FindById(id) != null)
-                {
-                    continue;
-                }
-                model.Id = id;
-            } while (model.Id == 0);
 
-            service.Add(model);
+            context.UserInfos.Add(model);
 
-            service.SaveChanges();
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             ViewData["id"] = id;
-            var form = new UserInfoForm(service.GetAll().First(x => x.Id == id));
-            var userSkills = userSkillService.GetAll().Where(x => x.UserId == id).ToList();
-            var skills = skillService.GetAll().ToList();
-            var availableSkills = skills.Where(x => !userSkills.Select(x => x.SkillId).ToList().Contains(x.Id)).ToList();
-            
+            var model = await context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .ThenInclude(x => x.Icon)
+                .Include(x => x.ImageFiles)
+                .Include(x => x.MainImageFile)
+                .FirstAsync(x => x.Id == id);
+
+            var form = new UserInfoForm(model);
+
+
+            var userSkills = model.UserSkills;
+            var skills = await context.Skills
+                .Include(x => x.Icon)
+                .ToListAsync();
+            var availableSkills = skills.Where(x => !userSkills.Select(x => x.Skill.Id).ToList().Contains(x.Id)).ToList();
+
             ViewData["userSkills"] = userSkills;
             ViewData["skills"] = skills;
             ViewData["availableSkills"] = availableSkills;
@@ -89,13 +106,28 @@ namespace hw5_mvc_.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(int id, [FromForm] UserInfoForm form)
         {
+            var model = await context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .Include(x => x.ImageFiles)
+                .Include(x => x.MainImageFile)
+                .FirstAsync(x => x.Id == id);
+
             if (!ModelState.IsValid)
             {
                 ViewData["id"] = id;
+                var userSkills = model.UserSkills;
+                var skills = await context.Skills
+                    .Include(x => x.Icon)
+                    .ToListAsync();
+                var availableSkills = skills.Where(x => !userSkills.Select(x => x.Skill.Id).ToList().Contains(x.Id)).ToList();
+
+                ViewData["userSkills"] = userSkills;
+                ViewData["skills"] = skills;
+                ViewData["availableSkills"] = availableSkills;
                 return View(form);
             }
 
-            var model = service.FindById(id);
             if (form.Image != null)
             {
                 var imageFile = await fileService.SaveAsync("userInfos", form.Image);
@@ -107,97 +139,107 @@ namespace hw5_mvc_.Controllers
                 foreach (var item in form.Gallery)
                 {
                     var imageFile = await fileService.SaveAsync("userInfos", item);
-                    if (imageFile == null) Console.WriteLine("imagefile == null");
                     model.ImageFiles.Add(imageFile);
                 }
             }
 
             form.Update(model);
-            service.SaveChanges();
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var userToDelete = service.FindById(id);
+            var userToDelete = await context.UserInfos.FirstAsync(x => x.Id == id);
             foreach (var item in userToDelete.ImageFiles.ToList())
             {
                 fileService.Delete(item);
             }
-            service.Delete(userToDelete);
-            service.SaveChanges();
+            context.UserInfos.Remove(userToDelete);
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-        public IActionResult ChangeMainImage(int id, [FromQuery] string src)
+        public async Task<IActionResult> ChangeMainImage(int id, [FromQuery] int imageId)
         {
-            var model = service.FindById(id);
-            model.MainImageFile = model.ImageFiles.First(x => x.Src == src);
-            service.SaveChanges();
+            var model = await context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .Include(x => x.ImageFiles)
+                .Include(x => x.MainImageFile)
+                .FirstAsync(x => x.Id == id);
+
+            model.MainImageFile = model.ImageFiles.First(x => x.Id == imageId);
+            await context.SaveChangesAsync();
             return Json(new { Ok = true });
         }
 
-        public IActionResult DeleteImage(int id, [FromQuery] string src)
+        public async Task<IActionResult> DeleteImage(int id, [FromQuery] int imageId)
         {
-            var model = service.FindById(id);
-            var file = model.ImageFiles.FirstOrDefault(x => x.Src == src);
+            var model = await context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .Include(x => x.ImageFiles)
+                .Include(x => x.MainImageFile)
+                .FirstAsync(x => x.Id == id);
+
+            var file = model.ImageFiles.FirstOrDefault(x => x.Id == imageId);
             if (file != null)
             {
                 fileService.Delete(file);
+                context.ImageFiles.Remove(file);
                 model.ImageFiles.Remove(file);
-                service.SaveChanges();
+                context.SaveChangesAsync();
             }
 
             return Json(new { Ok = true });
         }
-        public IActionResult AddSkill([FromBody] UserSkill data)
+        [HttpPost]
+        public async Task<IActionResult> AddSkill(int id, [FromBody] UserSkillForm data)
         {
-            var skill = skillService.GetAll().First(x => x.Id == data.SkillId);
-            var user = service.GetAll().First(x => x.Id == data.UserId);
+            var user = await context.UserInfos
+                .Include(x => x.UserSkills)
+                .ThenInclude(x => x.Skill)
+                .FirstAsync(x => x.Id == id);
 
-            if (null != userSkillService.GetAll().FirstOrDefault(x => x.UserId == user.Id && x.SkillId == skill.Id))
+            //TODO form
+            var skill = await context.Skills.FirstAsync(x => x.Id == data.SkillId);
+
+
+            if (null != user.UserSkills.FirstOrDefault(x => x.Skill.Id == skill.Id))
             {
+                // Already added
                 Response.StatusCode = 400;
-                return Json(new { Ok = false });
+                return Json(new { Ok = false, Error = "Alredy exists" });
             }
-            var newUserSkill = new UserSkill
-            {
-                UserId = user.Id,
-                SkillId = skill.Id,
-                Level = data.Level
-            };
-            var random = new Random();
-            do
-            {
-                var id = random.Next(1, 1000);
-                if (userSkillService.FindById(id) != null)
-                {
-                    continue;
-                }
-                newUserSkill.Id = id;
-            } while (user.Id == 0);
 
+            user.UserSkills.Add(new UserSkill
+            {
+                Level = data.Level,
+                Skill = skill,
+                UserInfo = user
+            });
 
-            userSkillService.Add(newUserSkill);
-            userSkillService.SaveChanges();
+            await context.SaveChangesAsync();
+
             return Json(new { Ok = true });
         }
-        public IActionResult DeleteSkill([FromBody] UserSkill data)
+        public async Task<IActionResult> DeleteSkill(int id)
         {
-            var userSkill = userSkillService.GetAll().First(x => x.SkillId == data.SkillId && x.UserId == data.UserId);
+            var userSkill = await context.UserSkills.FirstAsync(x => x.Id == id);
             if (userSkill != null)
             {
-                userSkillService.Delete(userSkill);
-                userSkillService.SaveChanges();
+                context.UserSkills.Remove(userSkill);
+                await context.SaveChangesAsync();
                 return Json(new { Ok = true });
             }
             return Json(new { Ok = false });
         }
-        public IActionResult EditSkill([FromBody] UserSkill data)
+        public async Task<IActionResult> EditSkill([FromBody] UserSkill data)
         {
-            var userSkill = userSkillService.GetAll().First(x => x.SkillId == data.SkillId && x.UserId == data.UserId);
+            var userSkill = await context.UserSkills.FirstAsync(x => x.Id == data.Id);
             if (userSkill != null)
             {
                 userSkill.Level = data.Level;
-                userSkillService.SaveChanges();
+                await context.SaveChangesAsync();
                 return Json(new { Ok = true });
             }
             return Json(new { Ok = false });

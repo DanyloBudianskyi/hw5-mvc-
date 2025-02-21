@@ -1,5 +1,6 @@
 using hw5_mvc_.Models;
 using hw5_mvc_.Models.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace hw5_mvc_
 {
@@ -11,10 +12,14 @@ namespace hw5_mvc_
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddScoped<UserInfoService>();
-            builder.Services.AddScoped<SkillService>();
+            //builder.Services.AddScoped<UserInfoService>();
+            //builder.Services.AddScoped<SkillService>();
             builder.Services.AddScoped<FileService>();
-            builder.Services.AddScoped<UserSkillService>();
+            //builder.Services.AddScoped<UserSkillService>();
+            builder.Services.AddDbContext<SiteContext>(o =>
+                o.UseSqlServer("Server=DESKTOP-8ISC2JM;Database=Site;Trusted_Connection=True;TrustServerCertificate=True;"));
+
+
 
             var app = builder.Build();
 

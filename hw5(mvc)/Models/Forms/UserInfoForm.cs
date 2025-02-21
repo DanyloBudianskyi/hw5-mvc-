@@ -25,7 +25,7 @@ namespace hw5_mvc_.Models.Forms
             model.Salary = Salary;
             model.Experience = Experience;
             model.Birthday = Birthday;
-            model.Profession = Professions[ProfessionId];
+            model.Profession = Professions[ProfessionId ?? 0];
         }
 
         [DisplayName("Full name")]
@@ -46,7 +46,8 @@ namespace hw5_mvc_.Models.Forms
         [DisplayName("Date of birthday")]
         [Required(ErrorMessage = "Date of birthday is required")]
         public DateTime Birthday { get; set; }
-        public int ProfessionId { get; set; }
+        [Required(ErrorMessage = "Select variant")]
+        public int? ProfessionId { get; set; }
         public List<string> Professions => [
             "Designer",
             "Tester",

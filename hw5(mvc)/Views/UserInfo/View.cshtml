@@ -25,38 +25,17 @@
         <h2>My Gallery</h2>
         @if (Model.ImageFiles.Count > 0)
         {
-                            <div style="display: flex">
+            <div style="display: flex">
                 @foreach (var item in Model.ImageFiles)
                 {
-                                    <div style="position: relative">
-                                        <img style="max-width: 200px;" class="img-thumbnail" src="@item.Src" />
-                                        <button data-id="@Model.Id" data-name="@item.Src" class="btn btn-sm btn-danger delete-image" style="position: absolute; top: 5px; right: 5px;">X</button>
-                                        <button data-id="@Model.Id" data-name="@item.Src" class="btn btn-sm btn-success set-main-image" style="position:absolute; left: 35px; bottom: 10px;">Set as main image</button>
-                                    </div>
+                    <div style="position: relative">
+                        <img style="max-width: 200px;" class="img-thumbnail" src="@item.Src" />
+                        <button data-id="@Model.Id" data-image-id="@item.Id" class="btn btn-sm btn-danger delete-image" style="position: absolute; top: 5px; right: 5px;">X</button>
+                        <button data-id="@Model.Id" data-image-id="@item.Id" class="btn btn-sm btn-success set-main-image" style="position:absolute; left: 35px; bottom: 10px;">Set as main image</button>
+                    </div>
                 }
-                            </div>
+            </div>
         }
-        @*         <table class="table table-hover">
-        <tbody>
-        <tr>
-        <th>Title</th>
-        <th>Progress bar</th>
-        <th>%</th>
-        </tr>
-        @foreach (var skill in Model.Skills)
-        {
-        <tr>
-        <td>@skill.Title</td>
-        <td>
-        <div class="progress">
-        <div class="progress-bar" style="width:@skill.Level%;"></div>
-        </div>
-        </td>
-        <td>@skill.Level %</td>
-        </tr>
-        }
-        </tbody>
-        </table> *@
         <table class="table table-hover">
             <tbody>
                 <tr>
@@ -66,7 +45,7 @@
                 </tr>
                 @foreach (var userSkill in userSkills)
                 {
-                    var currentSkill = skills.First(x => x.Id == userSkill.SkillId);
+                    var currentSkill = skills.First(x => x.Id == userSkill.Skill.Id);
                     <tr>
                         <td>@currentSkill.Title</td>
                         <td>
@@ -91,19 +70,19 @@
                     el.addEventListener("click", e => {
                         console.log("click on set main image btn")
                         const itemId = e.target.getAttribute("data-id")
-                        const imageSrc = e.target.getAttribute("data-name")
-                        fetch(`/UserInfo/ChangeMainImage/${itemId}?src=${imageSrc}`)
+                        const imageId = e.target.getAttribute("data-image-id")
+                    fetch(`/UserInfo/ChangeMainImage/${itemId}?imageId=${imageId}`)
                             .then(() => {
                                 window.location.reload()
                             })
                     })
                 })
-                    document.querySelectorAll(".delete-image").forEach(el => {
+            document.querySelectorAll(".delete-image").forEach(el => {
                 el.addEventListener("click", e => {
                     console.log("click on set main image btn")
-                    const itemId = e.target.getAttribute("data-id")
-                    const imageSrc = e.target.getAttribute("data-name")
-                    fetch(`/UserInfo/DeleteImage/${itemId}?src=${imageSrc}`)
+                        const itemId = e.target.getAttribute("data-id")
+                        const imageId = e.target.getAttribute("data-image-id")
+                    fetch(`/UserInfo/DeleteImage/${itemId}?imageId=${imageId}`)
                         .then(() => {
                             window.location.reload()
                         })

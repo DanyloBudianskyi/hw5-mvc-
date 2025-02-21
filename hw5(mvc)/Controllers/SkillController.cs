@@ -2,15 +2,18 @@
 using hw5_mvc_.Models.Forms;
 using hw5_mvc_.Models.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace hw5_mvc_.Controllers
 {
-    public class SkillController(ILogger<SkillController> logger, SkillService service, FileService fileService) : Controller
+    public class SkillController(ILogger<SkillController> logger, SiteContext context, FileService fileService) : Controller
     {
         public IActionResult Index()
         {
-            return View(service.GetAll());
+            return View(context.Skills
+                .Include(x => x.Icon)
+                .ToList());
         }
         [HttpGet]
         public IActionResult Create()
@@ -34,29 +37,19 @@ namespace hw5_mvc_.Controllers
                 model.Icon = imageFile;
             }
 
-            var random = new Random();
-            do
-            {
-                var id = random.Next(1, 30);
-                if (service.FindById(id) != null)
-                {
-                    continue;
-                }
-                model.Id = id;
-            } while (model.Id == 0);
-
-            service.Add(model);
+            await context.Skills.AddAsync(model);
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
         public IActionResult Edit(int id)
         {
-            var model = service.FindById(id);
+            var model = context.Skills.First(x => x.Id == id);
             if (model.Icon != null)
             {
                 ViewData["icon"] = model.Icon;
             }
             ViewData["id"] = id;
-            return View(new SkillForm(service.FindById(id)));
+            return View(new SkillForm(context.Skills.First(x => x.Id == id)));
         }
         [HttpPost]
         public async Task<IActionResult> Edit(int id, [FromForm] SkillForm form)
@@ -66,27 +59,28 @@ namespace hw5_mvc_.Controllers
                 ViewData["id"] = id;
                 return View(form);
             }
-            
-            var model = service.FindById(id);
+
+            var model = context.Skills.First(x => x.Id == id);
             if (form.Icon != null)
             {
-                var imageFile = await fileService.SaveAsync("skillIcons", form.Icon);
                 if(model.Icon != null)
                 {
                     fileService.Delete(model.Icon);
+                    context.ImageFiles.Remove(model.Icon);
                 }
-                model.Icon = imageFile;
+                model.Icon = await fileService.SaveAsync("skillIcons", form.Icon);
             }
             form.Update(model);
 
-            service.SaveChanges();
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var skillToDelete = service.FindById(id);
-            fileService.Delete(skillToDelete.Icon);
-            service.Delete(skillToDelete);
+            var skillToDelete = context.Skills.First(x => x.Id == id);
+            if (skillToDelete.Icon != null) context.ImageFiles.Remove(skillToDelete.Icon);
+            context.Skills.Remove(skillToDelete);
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
     }
