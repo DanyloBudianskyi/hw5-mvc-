@@ -1,0 +1,28 @@
+﻿@model UserInfo
+@{
+}
+
+<div class="card">
+	@if(Model.MainImageFile != null){
+		<img src="@Model.MainImageFile.Src" class="card-img-top" alt="@Model.Name" />
+	}
+	<div class="card-body">
+		<h5 class="card-title">@Model.Name</h5>
+		<p><span>Profession</span>: @Model.Profession?.Title</p>
+		<p class="card-text">@Model.Description</p>
+		@if (Model.UserSkills.Count != 0)
+		{
+			<div>
+				@foreach(var skill in Model.UserSkills)
+				{
+					<span class="badge rounded-pill" style="background-color: @skill.Skill.Color">
+						@skill.Skill.Title
+						</span>
+				}
+			</div>
+		}
+		<a asp-area="" asp-controller="UserInfo" asp-action="View" asp-route-id="@Model.Id" class=" btn btn-primary">
+			Details
+		</a>
+	</div>
+</div>

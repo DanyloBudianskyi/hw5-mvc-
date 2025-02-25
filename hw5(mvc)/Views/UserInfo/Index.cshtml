@@ -25,7 +25,7 @@
 					<td>@item.Id</td>
 					<td>@item.Name</td>
 					<td>@item.Email</td>
-					<td>@item.Profession</td>
+					<td>@item.Profession?.Title</td>
 					<td>
 						<a asp-area="" asp-controller="UserInfo" asp-action="View" asp-route-id="@item.Id" class=" btn btn-primary">
 							View

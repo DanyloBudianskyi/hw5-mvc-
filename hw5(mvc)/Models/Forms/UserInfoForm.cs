@@ -15,7 +15,7 @@ namespace hw5_mvc_.Models.Forms
             Salary = model.Salary;
             Experience = model.Experience;
             Birthday = model.Birthday;
-            if(model.Profession != null) ProfessionId = Professions.FindIndex(p => p == model.Profession);
+            ProfessionId = model.Profession?.Id;
         }
         public void Update(UserInfo model)
         {
@@ -25,7 +25,6 @@ namespace hw5_mvc_.Models.Forms
             model.Salary = Salary;
             model.Experience = Experience;
             model.Birthday = Birthday;
-            model.Profession = Professions[ProfessionId ?? 0];
         }
 
         [DisplayName("Full name")]
@@ -48,13 +47,14 @@ namespace hw5_mvc_.Models.Forms
         public DateTime Birthday { get; set; }
         [Required(ErrorMessage = "Select variant")]
         public int? ProfessionId { get; set; }
-        public List<string> Professions => [
-            "Designer",
-            "Tester",
-            "Frontend developer",
-            "Backend developer",
-            "Fullstack developer"
-        ];
+        public List<Profession>? Professions { get; set; } = null!;
+        //public List<string> Professions => [
+        //    "Designer",
+        //    "Tester",
+        //    "Frontend developer",
+        //    "Backend developer",
+        //    "Fullstack developer"
+        //];
         [DisplayName("Profile image")]
         public IFormFile? Image { get; set; }
 

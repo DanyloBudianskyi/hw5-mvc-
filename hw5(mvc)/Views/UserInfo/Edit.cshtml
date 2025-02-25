@@ -1,9 +1,8 @@
 ﻿@model UserInfoForm
 @{
     ViewData["Title"] = "Edit " + ViewData["id"];
-    var i = 0;
-    var list = new SelectList(Model.Professions.Select(
-        x => new { Id = i++, Title = x })
+    var list = new SelectList(Model.
+        Professions
         .ToList(), "Id", "Title");
 
     var userSkills = ViewData["userSkills"] as List<UserSkill>;

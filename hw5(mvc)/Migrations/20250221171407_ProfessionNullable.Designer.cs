@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using hw5_mvc_.Models;
 
@@ -11,9 +12,11 @@ using hw5_mvc_.Models;
 namespace hw5_mvc_.Migrations
 {
     [DbContext(typeof(SiteContext))]
-    partial class SiteContextModelSnapshot : ModelSnapshot
+    [Migration("20250221171407_ProfessionNullable")]
+    partial class ProfessionNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace hw5_mvc_.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ImageFileUserInfo", b =>
-                {
-                    b.Property<int>("ImageFilesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserInfosId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ImageFilesId", "UserInfosId");
-
-                    b.HasIndex("UserInfosId");
-
-                    b.ToTable("ImageFileUserInfo");
-                });
 
             modelBuilder.Entity("hw5_mvc_.Models.ImageFile", b =>
                 {
@@ -53,7 +41,12 @@ namespace hw5_mvc_.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UserInfoId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserInfoId");
 
                     b.ToTable("ImageFiles");
                 });
@@ -170,19 +163,11 @@ namespace hw5_mvc_.Migrations
                     b.ToTable("UserInfos");
                 });
 
-            modelBuilder.Entity("ImageFileUserInfo", b =>
+            modelBuilder.Entity("hw5_mvc_.Models.ImageFile", b =>
                 {
-                    b.HasOne("hw5_mvc_.Models.ImageFile", null)
-                        .WithMany()
-                        .HasForeignKey("ImageFilesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("hw5_mvc_.UserInfo", null)
-                        .WithMany()
-                        .HasForeignKey("UserInfosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("ImageFiles")
+                        .HasForeignKey("UserInfoId");
                 });
 
             modelBuilder.Entity("hw5_mvc_.Models.UserSkill", b =>
@@ -230,6 +215,8 @@ namespace hw5_mvc_.Migrations
 
             modelBuilder.Entity("hw5_mvc_.UserInfo", b =>
                 {
+                    b.Navigation("ImageFiles");
+
                     b.Navigation("UserSkills");
                 });
 #pragma warning restore 612, 618

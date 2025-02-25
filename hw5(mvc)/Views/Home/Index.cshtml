@@ -1,8 +1,46 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var userInfos = ViewData["userInfos"] as List<UserInfo>;
+    var professions = ViewData["professions"] as List<Profession>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex align-items-center">
+    <div class="mx-1">
+        <input type="text" class="form-control" id="search-text" />
+    </div>
+
+    <div class="mx-1">
+        <select>
+            <option value="">Professions</option>
+            @foreach(var item in professions)
+            {
+                <option value="@item.Id">@item.Title</option>
+            }
+        </select>
+
+    </div>
+    <button id="find"class="btn btn-secondary">Find</button>
 </div>
+
+<div id="search-results" style="display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 1rem"  class="my-4">
+    @await Html.PartialAsync("_SearchResult", userInfos);
+</div>
+
+@section Scripts{
+    <script>
+        document.getElementById("find").addEventListener("click", async e => {
+            const text = document.getElementById("search-text").value;
+
+            const url = new URL("/Home/Search", window.location.href);
+            if (text) {
+                url.searchParams.append("searchForm.text", text);
+            }
+
+            await fetch(url.href).then(x => x.text()).then(html => {
+                document.getElementById("search-results").innerHTML = html;
+            });
+
+            document.getElementById("search-text").value = "";
+       });
+    </script>
+}

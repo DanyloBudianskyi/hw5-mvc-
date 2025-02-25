@@ -6,5 +6,7 @@
         public string OriginalFileName { get; set; } = null!;
         public string FileName { get; set; } = null!;
         public string Src => "/uploads/" + FileName;
+
+        public virtual ICollection<UserInfo> UserInfos { get; set; } = null!;
     }
 }

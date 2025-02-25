@@ -1,0 +1,37 @@
+﻿@model List<Profession>
+@{
+	ViewData["Title"] = "List of professions";
+}
+
+<div>
+	<h1>@ViewData["Title"]</h1>
+	<a asp-controller="Profession" asp-action="Create"
+		class="btn btn-success">Create new profession
+	</a>
+	<table class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Title</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var item in Model)
+			{
+				<tr>
+					<td>@item.Id</td>
+
+					<td>@item.Title</td>
+					<td>
+						<a asp-area="" asp-controller="Profession" asp-action="Edit" asp-route-id="@item.Id" class=" btn btn-primary">
+							Edit
+						</a>
+						<a asp-area="" asp-controller="Profession" asp-action="Delete" asp-route-id="@item.Id" class=" btn btn-danger">
+							Delete
+						</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

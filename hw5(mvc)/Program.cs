@@ -1,6 +1,7 @@
 using hw5_mvc_.Models;
 using hw5_mvc_.Models.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace hw5_mvc_
 {
@@ -41,6 +42,10 @@ namespace hw5_mvc_
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            var cultureInfo = new CultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
             app.Run();
         }

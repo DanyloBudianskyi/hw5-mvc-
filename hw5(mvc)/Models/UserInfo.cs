@@ -18,7 +18,7 @@ namespace hw5_mvc_
         public decimal Salary { get; set; }
         public int Experience { get; set; }
         public DateTime Birthday { get; set; }
-        public string? Profession { get; set; }
+        public virtual Profession? Profession { get; set; }
         public virtual ImageFile? MainImageFile { get; set; }
         public virtual ICollection<ImageFile> ImageFiles { get; set; }
         public virtual ICollection<UserSkill> UserSkills { get; set; }

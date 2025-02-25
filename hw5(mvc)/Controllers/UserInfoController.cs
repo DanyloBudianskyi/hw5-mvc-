@@ -16,6 +16,7 @@ namespace hw5_mvc_.Controllers
         public IActionResult Index()
         {
             return View(context.UserInfos
+                .Include(x => x.Profession)
                 .Include(x => x.UserSkills)
                 .ThenInclude(x => x.Skill)
                 .Include(x => x.ImageFiles)
@@ -25,6 +26,7 @@ namespace hw5_mvc_.Controllers
         public async Task<IActionResult> View(int id)
         {
             var model = context.UserInfos
+                .Include(x => x.Profession)
                 .Include(x => x.UserSkills)
                 .ThenInclude(x => x.Skill)
                 .Include(x => x.ImageFiles)
@@ -41,9 +43,13 @@ namespace hw5_mvc_.Controllers
             return View(model);
         }
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var model = new UserInfoForm(new UserInfo());
+            var model = new UserInfoForm(new UserInfo())
+            {
+                Professions = await context.Professions.ToListAsync()
+            };
+            
             return View(model);
         }
         [HttpPost]
@@ -55,6 +61,8 @@ namespace hw5_mvc_.Controllers
             }
             var model = new UserInfo();
             form.Update(model);
+            
+
             if (form.Image != null)
             {
                 var imageFile = await fileService.SaveAsync("userInfos", form.Image);
@@ -70,7 +78,7 @@ namespace hw5_mvc_.Controllers
                     model.ImageFiles.Add(imageFile);
                 }
             }
-
+            model.Profession = await context.Professions.FirstAsync(x => x.Id == form.ProfessionId);
             context.UserInfos.Add(model);
 
             await context.SaveChangesAsync();
@@ -81,6 +89,7 @@ namespace hw5_mvc_.Controllers
         {
             ViewData["id"] = id;
             var model = await context.UserInfos
+                .Include(x => x.Profession)
                 .Include(x => x.UserSkills)
                 .ThenInclude(x => x.Skill)
                 .ThenInclude(x => x.Icon)
@@ -89,7 +98,7 @@ namespace hw5_mvc_.Controllers
                 .FirstAsync(x => x.Id == id);
 
             var form = new UserInfoForm(model);
-
+            form.Professions = await context.Professions.ToListAsync();
 
             var userSkills = model.UserSkills;
             var skills = await context.Skills
@@ -107,13 +116,15 @@ namespace hw5_mvc_.Controllers
         public async Task<IActionResult> Edit(int id, [FromForm] UserInfoForm form)
         {
             var model = await context.UserInfos
-                .Include(x => x.UserSkills)
-                .ThenInclude(x => x.Skill)
-                .Include(x => x.ImageFiles)
-                .Include(x => x.MainImageFile)
-                .FirstAsync(x => x.Id == id);
+				.Include(x => x.Profession)
+				.Include(x => x.UserSkills)
+				.ThenInclude(x => x.Skill)
+				.ThenInclude(x => x.Icon)
+				.Include(x => x.ImageFiles)
+				.Include(x => x.MainImageFile)
+				.FirstAsync(x => x.Id == id);
 
-            if (!ModelState.IsValid)
+			if (!ModelState.IsValid)
             {
                 ViewData["id"] = id;
                 var userSkills = model.UserSkills;
@@ -125,6 +136,7 @@ namespace hw5_mvc_.Controllers
                 ViewData["userSkills"] = userSkills;
                 ViewData["skills"] = skills;
                 ViewData["availableSkills"] = availableSkills;
+                form.Professions = await context.Professions.ToListAsync();
                 return View(form);
             }
 
@@ -144,6 +156,7 @@ namespace hw5_mvc_.Controllers
             }
 
             form.Update(model);
+            model.Profession = await context.Professions.FirstAsync(x => x.Id == form.ProfessionId);
             await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -199,14 +212,11 @@ namespace hw5_mvc_.Controllers
                 .Include(x => x.UserSkills)
                 .ThenInclude(x => x.Skill)
                 .FirstAsync(x => x.Id == id);
-
-            //TODO form
             var skill = await context.Skills.FirstAsync(x => x.Id == data.SkillId);
 
 
             if (null != user.UserSkills.FirstOrDefault(x => x.Skill.Id == skill.Id))
             {
-                // Already added
                 Response.StatusCode = 400;
                 return Json(new { Ok = false, Error = "Alredy exists" });
             }
