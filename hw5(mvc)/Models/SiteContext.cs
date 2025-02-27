@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace hw5_mvc_.Models
 {
-    public class SiteContext : DbContext
+    public class SiteContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public SiteContext(DbContextOptions options) : base(options) { }
         public virtual DbSet<UserInfo> UserInfos { get; set; }
@@ -13,6 +15,8 @@ namespace hw5_mvc_.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<ImageFile>()
                 .HasMany(x => x.UserInfos)
                 .WithMany(x => x.ImageFiles)

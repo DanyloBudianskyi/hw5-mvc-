@@ -1,0 +1,41 @@
+﻿@model LoginForm
+@{
+    ViewData["Title"] = "Registration";
+}
+
+<div>
+    <h1 class="display-4">@ViewData["Title"]</h1>
+    <form method="post" asp-area="Auth" asp-controller="Account" asp-action="Register" asp-route-ReturnUrl="@Context.Request.Query["ReturnUrl"]">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    @Html.LabelFor(x => x.Login, new { @class = "form-label" })
+                    @Html.TextBoxFor(x => x.Login, new { @class = "form-control", type = "email" })
+                    @Html.ValidationMessageFor(x => x.Login, null, new { @class = "text-danger" })
+                </div>
+                <div class="mb-3">
+                    @Html.LabelFor(x => x.Password, new { @class = "form-label" })
+                    @Html.TextBoxFor(x => x.Password, new { @class = "form-control", type = "password" })
+                    @Html.ValidationMessageFor(x => x.Password, null, new { @class = "text-danger" })
+                </div>
+            </div>
+            <div>
+                <h6>
+                    Already have an account?
+                    <a asp-area="Auth"
+                       asp-controller="Account"
+                       asp-action="Login"
+                       asp-route-ReturnUrl="@Context.Request.Query["ReturnUrl"]">
+                       Login
+                   </a>
+                </h6>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary" type="submit">Register</button>
+            </div>
+        </div>
+    </form>
+
+
+</div>

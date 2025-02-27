@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 
-    public class ViewLogin : PageModel
+    public class ViewRegister : PageModel
     {
         public void OnGet()
         {

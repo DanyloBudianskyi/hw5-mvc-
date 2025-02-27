@@ -1,12 +1,14 @@
 ﻿using hw5_mvc_.Models;
 using hw5_mvc_.Models.Forms;
 using hw5_mvc_.Models.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace hw5_mvc_.Controllers
 {
+    [Authorize]
     public class SkillController(ILogger<SkillController> logger, SiteContext context, FileService fileService) : Controller
     {
         public IActionResult Index()
