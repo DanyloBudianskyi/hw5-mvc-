@@ -4,13 +4,15 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace hw5_mvc_.Areas.Auth.Controllers
 {
     [Area("Auth")]
     public class AccountController(
-        UserManager<User> userManager
+        UserManager<User> userManager,
+        SiteContext context
         ) : Controller
     {
         [HttpGet]
@@ -47,6 +49,7 @@ namespace hw5_mvc_.Areas.Auth.Controllers
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             identity.AddClaim(new Claim(ClaimTypes.Email, user.Email));
 
+
             //var userRoles = await userManager.GetRolesAsync(user);
             //userRoles.ToList().ForEach(r =>
             //{
@@ -55,6 +58,11 @@ namespace hw5_mvc_.Areas.Auth.Controllers
 
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal);
+
+            if (String.IsNullOrEmpty(returnUrl))
+            {
+                return RedirectToAction("Index", new { Area = "", Controller = "Home" });
+            }
 
             return Redirect(returnUrl);
         }
@@ -70,7 +78,8 @@ namespace hw5_mvc_.Areas.Auth.Controllers
             {
                 return View(form);
             }
-            var user = await userManager.FindByEmailAsync(form.Login);
+            var user = await context.Users.Include(x => x.ImageFile)
+                .FirstOrDefaultAsync(x => x.UserName == form.Login);
             if (user == null)
             {
                 ModelState.AddModelError(nameof(form.Login), "User not found");
@@ -86,6 +95,10 @@ namespace hw5_mvc_.Areas.Auth.Controllers
             var identity = new ClaimsIdentity(IdentityConstants.ApplicationScheme);
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             identity.AddClaim(new Claim(ClaimTypes.Email, user.Email));
+            identity.AddClaim(new Claim("Avatar", user.ImageFile?.Src ?? ""));
+
+
+            
 
             //var userRoles = await userManager.GetRolesAsync(user);
             //userRoles.ToList().ForEach(r =>

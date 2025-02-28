@@ -55,7 +55,7 @@ namespace hw5_mvc_
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            app.UseStaticFiles(); 
 
             app.UseRouting();
 

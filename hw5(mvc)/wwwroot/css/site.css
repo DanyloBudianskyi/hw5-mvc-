@@ -27,3 +27,12 @@ body {
     object-fit: cover; /* Обрезает изображение, сохраняя пропорции */
     border-radius: 8px; /* Скругление углов */
 }
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    background-position: center;
+    background-size: cover;
+    border: 1px solid grey;
+    border-radius: 50%;
+}
